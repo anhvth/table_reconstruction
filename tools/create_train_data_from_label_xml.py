@@ -35,8 +35,8 @@ def create_train_data_from_label_xml(img_paths, xml_paths, output_path):
 
 
 if __name__ == '__main__':
-    xml_paths = glob('data/text_line_verified/*.xml')
-    img_paths = glob('data/text_line_verified/*.png')
+    xml_paths = glob('{}/*.xml'.format(args.input_dir))
+    img_paths = glob('{}/*.png'.format(args.input_dir))
     print('Num of sample:', len(xml_paths))
     create_train_data_from_label_xml(
         img_paths, xml_paths, output_path=args.output_dir)
