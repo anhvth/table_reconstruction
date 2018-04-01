@@ -149,7 +149,7 @@ def gen_deconv(batch_input, out_channels, stride):
         _b, h, w, _c = batch_input.shape
         resized_input = tf.image.resize_images(
             batch_input, [h * 2, w * stride], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
-        filters = tf.Variable(tf.random_normal([4, 4, num_filter, out_channels//2]))
+        filters = tf.Variable(tf.random_normal([4, 4, num_filter, num_filter]))
         g1= tf.layers.separable_conv2d(resized_input, out_channels//2, kernel_size=4, strides=(1, 1), padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
         batch_input2 = tf.nn.atrous_conv2d(batch_input, num_filter, 3, padding='SAME')
         resized_input2 = tf.image.resize_images(
