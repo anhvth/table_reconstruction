@@ -11,3 +11,4 @@ python tools/find_roi.py \
 python tools/create_train_data_from_label_xml.py \
     --input_dir output/pngxml_output \
     --output_dir  output/region_output
+    --output_type 0

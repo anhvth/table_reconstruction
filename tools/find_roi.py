@@ -10,8 +10,8 @@ from xml_tools import *
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--input_dir', default='output/text_line_pngxml', help='input')
-parser.add_argument('--output_dir', default='output/proposed_region', help='input')
+parser.add_argument('--input_dir', default='output/run_method2', help='input')
+parser.add_argument('--output_dir', default='output/text_line_pngxml', help='input')
 args = parser.parse_args()
 
 
