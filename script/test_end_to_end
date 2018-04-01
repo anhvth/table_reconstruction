@@ -9,6 +9,6 @@ python tools/find_roi.py \
 
 
 python tools/create_train_data_from_label_xml.py \
-    --input_dir output/pngxml_output \
-    --output_dir  output/region_output
+    --input_dir output/1pngxml_output \
+    --output_dir  output/2region_output\
     --output_type merge
