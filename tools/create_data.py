@@ -68,11 +68,13 @@ def gen_image(path, thread=None):
 if __name__ == '__main__':
     paths = sorted(glob('data/train_bounding/*.png'))
     print('Num of inputs: ', len(paths))
-    for i in range(0, len(paths) -1, 2):
-        try:
-            _thread.start_new_thread( gen_image, (paths[i], "first", ) )
-            _thread.start_new_thread( gen_image, (paths[i+1], "second", ) )
-        except:
-            print ("Error: unable to start thread")
-        while 1:
-            pass
+    for path in paths:
+        gen_image(path)
+        
+        # try:
+        #     _thread.start_new_thread( gen_image, (paths[i], "first", ) )
+        #     _thread.start_new_thread( gen_image, (paths[i+1], "second", ) )
+        # except:
+        #     print ("Error: unable to start thread")
+        # while 1:
+        #     pass
