@@ -54,7 +54,7 @@ def gen_image(path, thread=None):
     os.makedirs(synthetic_dir, exist_ok=True)
     name = os.path.split(path)[-1].split('.')[0]
     for i in range(args.n_sample):
-        scale_size = np.random.uniform(0.7, 1.3)
+        scale_size = np.random.uniform(0.3, 2)
         img = cv2.resize(img_goc, (2048, int(scale_size*img_goc.shape[0])))
         a, b = crop_input_output(img)
         a = cv2.cvtColor(a, cv2.COLOR_BGR2GRAY)
