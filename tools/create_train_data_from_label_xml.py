@@ -28,8 +28,10 @@ def create_train_data_from_label_xml(img_paths, xml_paths, output_path):
     for k in dict_images.keys():
         b = draw_cell(dict_images[k], dict_boxes[k], mode='binary')
         a = dict_images[k]
-        sample_inputs_outputs = np.concatenate([a, b], axis=1)
-        
+        if args.output_type == "merge":
+            sample_inputs_outputs = 0.5*a+0.5*b
+        else:        
+            sample_inputs_outputs = np.concatenate([a, b], axis=1)
         image_output_path = '{}/{}.png'.format(output_path, k)
         print(image_output_path)
         cv2.imwrite(image_output_path, sample_inputs_outputs)
