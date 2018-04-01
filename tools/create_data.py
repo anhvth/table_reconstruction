@@ -9,8 +9,10 @@ import time
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--n_sample', type=int, default=100,help='number of sample per images')
-
-parser = parser.parse_args()
+parser.add_argument('--input_dir', required=True, help='input')
+parser.add_argument('--output_dir', required=True, help='input')
+parser.add_argument('--output_type', default="input_output", choices=["merge", "input_output"])
+args = parser.parse_args()
 
 def normalize(img):
     img = img/255
@@ -47,11 +49,11 @@ def gen_image(path, thread=None):
     if thread is not None:
         info += thread
     print(info)
-    synthetic_dir = 'data/synthetic_data_bounding'
+    synthetic_dir = args.output_dir
     os.makedirs(synthetic_dir, exist_ok=True)
     os.makedirs(synthetic_dir, exist_ok=True)
     name = os.path.split(path)[-1].split('.')[0]
-    for i in range(parser.n_sample):
+    for i in range(args.n_sample):
         scale_size = np.random.uniform(0.7, 1.3)
         img = cv2.resize(img_goc, (2048, int(scale_size*img_goc.shape[0])))
         a, b = crop_input_output(img)
