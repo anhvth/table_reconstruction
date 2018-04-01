@@ -61,6 +61,7 @@ def draw_image(input_image, mask_image):
 if __name__ == '__main__':
     assert len(mask_paths) == len(input_paths) and len(input_paths) > 0
     print('Len:', len(mask_paths))
+    os.makedirs(args.output_dir)
     for i, (in_path, ma_path) in enumerate(zip(input_paths, mask_paths)):
         # ma_path = 'temp/322/0/output.png'
         # in_path = 'temp/322/0/input.png'
