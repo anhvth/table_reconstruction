@@ -3,6 +3,7 @@ from xml_tools import get_box, draw_cell
 from glob import glob
 import cv2
 import numpy as np
+import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_dir', default='output/run_method2', help='input')
