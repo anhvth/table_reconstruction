@@ -11,6 +11,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_dir', default='output/run_method2', help='input')
+parser.add_argument('--output_dir', default='output/text_line_pngxml', help='input')
 args = parser.parse_args()
 
 
@@ -67,10 +68,10 @@ if __name__ == '__main__':
         input_image = cv2.imread(in_path)
         print(mask_image.shape==input_image.shape)
         _, pad, cells = draw_image(input_image, mask_image)
-        img_path = 'output/text_line/{i:03d}.png'.format(i=i)
+        img_path = '{}/{i:03d}.png'.format(args.output_dir, i=i)
         cv2.imwrite(img_path, input_image)
         xml = cells_to_xml(cells)
-        with open('output/text_line/{i:03d}.xml'.format(i=i), mode='w') as f:
+        with open('{}/{i:03d}.xml'.format(args.output_dir, i=i), mode='w') as f:
             f.write(xml)
         print(img_path)
         # cv2.imwrite('temp/{}_shape-image.png'.format(i), image_output)

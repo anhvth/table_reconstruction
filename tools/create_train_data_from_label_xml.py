@@ -4,6 +4,12 @@ from glob import glob
 import cv2
 import numpy as np
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_dir', default='output/run_method2', help='input')
+parser.add_argument('--output_dir', default='output/run_method2', help='input')
+args = parser.parse_args()
+
+
 
 def create_train_data_from_label_xml(img_paths, xml_paths, output_path):
     dict_boxes = {}
@@ -32,4 +38,4 @@ if __name__ == '__main__':
     img_paths = glob('data/text_line_verified/*.png')
     print('Num of sample:', len(xml_paths))
     create_train_data_from_label_xml(
-        img_paths, xml_paths, output_path='data/train_bounding')
+        img_paths, xml_paths, output_path=args.output_path)
