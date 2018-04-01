@@ -6,7 +6,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_dir', default='output/run_method2', help='input')
-parser.add_argument('--output_dir', default='output/run_method2', help='input')
+parser.add_argument('--output_dir', default='output/propose_region', help='input')
 args = parser.parse_args()
 
 
