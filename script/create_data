@@ -1,0 +1,3 @@
+# git pull
+rm -r data/synthetic_data_numpy
+python tools/create_data_matrix.py --num_of_sample 30000 --num_of_sample_per_file 200

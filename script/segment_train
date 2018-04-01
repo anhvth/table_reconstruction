@@ -1,0 +1,5 @@
+# git pull
+# rm -r pix2pix/output/segment_v1
+python pix2pix/pix2pix_segmentation.py --input_dir data/synthetic_data_numpy \
+--output_dir pix2pix/output/segment_v1 \
+--ngf 16 --ndf 64 --mode train --gan_weight 1 --l1_weight 100 --save_freq 2000 --batch_size 4 --checkpoint pix2pix/output/segment_v1 

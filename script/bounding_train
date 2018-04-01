@@ -1,0 +1,2 @@
+python tools/create_train_data_from_label_xml.py
+python tools/create_data.py

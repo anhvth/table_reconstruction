@@ -1,0 +1,4 @@
+python pix2pix/run_frozen_on_large_image.py \
+    --input_dir images/cell_data \
+    --checkpoint pix2pix/frozen_128x1024/
+    --stride 32
