@@ -127,8 +127,13 @@ def discrim_conv(batch_input, out_channels, stride):
 def gen_conv(batch_input, out_channels, stride):
     # [batch, in_height, in_width, in_channels] => [batch, out_height, out_width, out_channels]
     initializer = tf.random_normal_initializer(0, 0.02)
+    num_filter = batch_input.get_shape().as_list()[-1]
     if a.separable_conv:
-        return tf.layers.separable_conv2d(batch_input, out_channels, kernel_size=4, strides=(stride, 2), padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
+        g1 =  tf.layers.separable_conv2d(batch_input, out_channels//2, kernel_size=4, strides=(stride, 2),\
+                padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
+        filters = tf.Variable(tf.random_normal([4, 4, num_filter, out_channels//2]))
+        g2 = tf.nn.atrous_conv2d(batch_input, filters, 3, padding='SAME', name='dilated_conv_generator')
+        return tf.concat([g1, g2], axis=-1, name='fuse')
     else:
         return tf.layers.conv2d(batch_input, out_channels, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
 
@@ -136,11 +141,15 @@ def gen_conv(batch_input, out_channels, stride):
 def gen_deconv(batch_input, out_channels, stride):
     # [batch, in_height, in_width, in_channels] => [batch, out_height, out_width, out_channels]
     initializer = tf.random_normal_initializer(0, 0.02)
+    num_filter = batch_input.get_shape().as_list()[-1]
     if a.separable_conv:
         _b, h, w, _c = batch_input.shape
         resized_input = tf.image.resize_images(
             batch_input, [h * 2, w * stride], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
-        return tf.layers.separable_conv2d(resized_input, out_channels, kernel_size=4, strides=(1, 1), padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
+        filters = tf.Variable(tf.random_normal([4, 4, num_filter, out_channels//2]))
+        g1= tf.layers.separable_conv2d(resized_input, out_channels//2, kernel_size=4, strides=(1, 1), padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
+        g2 = tf.nn.atrous_conv2d(batch_input, filters, 3, padding='SAME')
+        return tf.concat([g1, g2], axis=-1, name='fuse')
     else:
         return tf.layers.conv2d_transpose(batch_input, out_channels, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
 
