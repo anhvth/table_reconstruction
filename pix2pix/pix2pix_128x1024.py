@@ -121,6 +121,10 @@ def augment(image, brightness):
 def discrim_conv(batch_input, out_channels, stride):
     padded_input = tf.pad(batch_input, [[0, 0], [1, 1], [
                           1, 1], [0, 0]], mode="CONSTANT")
+    num_filter = batch_input.get_shape().as_list()[-1]
+    filters = tf.Variable(tf.random_normal([4, 4, num_filter, out_channels]))
+    batch_input2 = tf.nn.atrous_conv2d(padded_input, filters, 3, padding='SAME', name='dilated_conv_generator')
+    concat_input = tf.concat([padded_input, batch_input2], axis=-1)
     return tf.layers.conv2d(padded_input, out_channels, kernel_size=4, strides=(stride, stride), padding="valid", kernel_initializer=tf.random_normal_initializer(0, 0.02))
 
 
