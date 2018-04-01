@@ -142,10 +142,10 @@ def gen_conv(batch_input, out_channels, stride):
         
         return tf.concat([g1, g2], axis=-1, name='fuse')
     else:
-        filters = tf.Variable(tf.random_normal([4, 4, num_filter, num_filter]))
+        filters = tf.Variable(tf.random_normal([4, 4, num_filter, num_filter], mean=0, stddev=0.02))
         batch_input2 = tf.nn.atrous_conv2d(batch_input, filters, 3, padding='SAME', name='dilated_conv_generator')
-        g1 =  tf.layers.conv2d(batch_input, out_channels, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
-        g2 =  tf.layers.conv2d(batch_input2, out_channels, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
+        g1 =  tf.layers.conv2d(batch_input, out_channels//2, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
+        g2 =  tf.layers.conv2d(batch_input2, out_channels//2, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
         return tf.concat([g1, g2], axis=-1, name='fuse')        
 # l
 
@@ -164,7 +164,6 @@ def gen_deconv(batch_input, out_channels, stride):
         # g2 = tf.nn.atrous_conv2d_transpose(resized_input, filters, rate=3, padding='SAME', output_shape=[-1, h, w, -1])
         return g1#tf.concat([g1], axis=-1, name='fuse')
     else:
-
         return tf.layers.conv2d_transpose(batch_input, out_channels, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
 
 
