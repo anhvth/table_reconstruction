@@ -131,7 +131,7 @@ if __name__ == '__main__':
         merge_image = 0.5*image+0.5*output_image
 
         # os.makedirs('output/{}_{}'.format(args.stride, name), exist_ok=True)
-        cv2.imwrite('output/{}_{}_input.png'.format(args.stride, name), image)
-        cv2.imwrite('output/{}_{}_output.png'.format(args.stride, name), output_image)
+        cv2.imwrite('{}/{}_{}_input.png'.format(args.output_dir,args.stride, name), image)
+        cv2.imwrite('{}/{}_{}_output.png'.format(args.output_dir, args.stride, name), output_image)
         cv2.imwrite('{}/{}_{}_merge.png'.format(args.output_dir, args.stride, name), merge_image)
     print('Running time:', time()-start)
