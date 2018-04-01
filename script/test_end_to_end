@@ -1,3 +1,13 @@
-python pix2pix/run_frozen_on_large_image.py --input_dir data/ano --output_dir output/run_large_image_output
-python find_roi.py --input_dir output/run_large_image_output --output_dir output/pngxml_output
-python create_train_data_from_label_xml.py --input_dir output_dir output/pngxml_output output/region_output
+python pix2pix/run_frozen_on_large_image.py \
+    --input_dir data/ano \
+    --output_dir output/run_large_image_output
+
+
+python tools/find_roi.py \
+    --input_dir output/run_large_image_output \
+    --output_dir output/pngxml_output
+
+
+python tools/create_train_data_from_label_xml.py \
+    --input_dir output/pngxml_output \
+    --output_dir  output/region_output
