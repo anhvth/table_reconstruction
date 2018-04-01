@@ -1,5 +1,5 @@
 #
 python download.py --link https://drive.google.com/open?id=1Raa2I78VDPApPhK0gO4yCp8MnW_IeF3u
-python download.py --link https://drive.google.com/open?id=1QGyrvRLzPG__QuG__-TxFvHIiR9jWBYbrm
+python download.py --link https://drive.google.com/open?id=1QGyrvRLzPG__QuG__-TxFvHIiR9jWBYb
 mkdir data/
-mv -r *.zip data/
+mv  *.zip data/
