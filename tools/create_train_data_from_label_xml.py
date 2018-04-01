@@ -39,4 +39,4 @@ if __name__ == '__main__':
     img_paths = glob('data/text_line_verified/*.png')
     print('Num of sample:', len(xml_paths))
     create_train_data_from_label_xml(
-        img_paths, xml_paths, output_path=args.output_path)
+        img_paths, xml_paths, output_path=args.output_dir)
