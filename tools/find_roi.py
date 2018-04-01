@@ -7,7 +7,7 @@ import argparse
 import imutils
 from xml_tools import *
 
-mask_paths = glob('/Users/macos/git_project/thesis2/thesis/output/*_output.png')
+mask_paths = glob('output/*_output.png')
 input_paths = [path.split('output.png')[0]+'input.png' for path in mask_paths]
 
 
