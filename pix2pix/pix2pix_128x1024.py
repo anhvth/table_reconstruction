@@ -150,7 +150,7 @@ def gen_deconv(batch_input, out_channels, stride):
     # [batch, in_height, in_width, in_channels] => [batch, out_height, out_width, out_channels]
     initializer = tf.random_normal_initializer(0, 0.02)
     num_filter = batch_input.get_shape().as_list()[-1]
-    if False:a.separable_conv:
+    if False:#a.separable_conv:
         _b, h, w, _c = batch_input.shape
         resized_input = tf.image.resize_images(
             batch_input, [h * 2, w * stride], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
