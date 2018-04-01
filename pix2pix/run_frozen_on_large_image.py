@@ -109,7 +109,7 @@ if __name__ == '__main__':
     os.makedirs(args.output_dir, exist_ok=True)
     
     paths = glob('{}/*.png'.format(args.input_dir))[:20]
-    paths = [path for path in paths if '148' in path ]
+    paths = [path for path in paths]
     assert len(paths) > 0
     print('num of sample:', len(paths), args.input_dir)
     for path in paths:
