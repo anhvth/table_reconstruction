@@ -8,7 +8,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_dir', default='output/run_method2', help='input')
 parser.add_argument('--output_dir', default='output/propose_region', help='input')
-parser.add_argument('--output_type', default="input_output", choice=["merge", "input_output"])
+parser.add_argument('--output_type', default="input_output", choices=["merge", "input_output"])
 args = parser.parse_args()
 
 
