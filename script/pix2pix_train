@@ -3,12 +3,12 @@ rm -r pix2pix/output/128x1024_64_data
 echo 'start training'
 #source activate tf
 python pix2pix/pix2pix_128x1024.py\
-    --input_dir data/synthetic_data_bounding \
-    --output_dir pix2pix/output/128x1024_64_data \
+    --input_dir data/train_images_20px \
+    --output_dir pix2pix/output/128x1024_64_v3 \
     --mode train --ngf 32 --ndf 32 --save_freq 5000\
     --l1_weight 1000 \
     --batch_size 1\
     --which_direction AtoB \
-    --display_freq 500
+    --display_freq 200
 
     

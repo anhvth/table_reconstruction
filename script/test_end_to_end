@@ -1,7 +1,8 @@
 python pix2pix/run_frozen_on_large_image.py \
     --input_dir data/ano \
     --output_dir output/0run_large_image_output\
-    --checkpoint pix2pix/output/frozen/128x1024_v2
+    --checkpoint pix2pix/output/frozen/128x1024_v3\
+    --method method1
 
 python tools/find_roi.py \
     --input_dir output/0run_large_image_output \
@@ -10,5 +11,5 @@ python tools/find_roi.py \
 
 python tools/create_train_data_from_label_xml.py \
     --input_dir output/1pngxml_output \
-    --output_dir  output/2region_output\
+    --output_dir  output/v3region_output\
     --output_type merge
