@@ -7,7 +7,14 @@ import argparse
 import imutils
 from xml_tools import *
 
-mask_paths = glob('output/*_output.png')
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_dir', default='output/run_method2', help='input')
+args = parser.parse_args()
+
+
+mask_paths = glob('{}/*_output.png'.format(args.input_dir))
 input_paths = [path.split('output.png')[0]+'input.png' for path in mask_paths]
 
 
