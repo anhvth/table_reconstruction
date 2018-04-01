@@ -37,7 +37,7 @@ parser.add_argument("--display_freq", type=int, default=0,
 parser.add_argument("--save_freq", type=int, default=5000,
                     help="save model every save_freq steps, 0 to disable")
 
-parser.add_argument("--separable_conv", type=bool, default=True,
+parser.add_argument("--separable_conv", action="store_true",
                     help="use separable convolutions in the generator")
 parser.add_argument("--aspect_ratio", type=float, default=1.0,
                     help="aspect ratio of output images (width/height)")
