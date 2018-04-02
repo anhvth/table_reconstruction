@@ -26,6 +26,27 @@ saver.restore(sess, tf.train.latest_checkpoint(
     args.checkpoint))
 
 
+def split(image, ksizes, strides):
+    images = tf.extract_image_patches(image, ksizes=ksizes, strides=strides, padding='SAME', rates=[1,1,1,1])
+    new_shape = [-1, *images.get_shape().as_list()[1:3], *ksizes[1:3], image.get_shape().as_list()[-1]]
+    images = tf.reshape(images, new_shape)
+    return images
+
+def join(image, images, ksizes, strides):
+    def f(images):
+        cx = ksizes[1] // 2
+        cy = ksizes[2] // 2
+        x1 = cx - strides[1]//2
+        x2 = x1+strides[1]
+        y1 = cy - strides[2]//2
+        y2 = y1+strides[2]        
+        images_croped = images[:,:,:,x1:x2, y1:y2,:]
+        return images_croped
+    split_image = tf.split(images, image.get_shape().as_list()[-1], axis=-1)
+    outputs = [f(img) for img in split_image]
+    outputs = tf.concat(outputs, axis=-1)
+    return tf.transpose(outputs, perm=[0,1,3,2,4,5])
+
 def get_tensor_by_name(name):
     name_on_device = '{}:0'.format(name)
     return tf.get_default_graph().get_tensor_by_name(name_on_device)
@@ -60,7 +81,6 @@ def split_image(image):
 def split_image_overlap(image, height=128, width=1024):
     rv = []
     for i in range(0, image.shape[0], args.stride):
-        
         pad = image[i:i+height]
         if pad.shape[0] == height:
             rv.append(pad)
@@ -70,8 +90,6 @@ def join_image_overlap(images):
     to_concat = [images[0][:args.stride+args.stride//2]]
     for i, image in enumerate(images[1:-1]):
         roi = image[args.stride//2:args.stride//2+args.stride]
-        if False:  # i % 2 == 0:
-            roi = 255 - roi
         to_concat.append(roi)
     to_concat.append(images[-1][args.stride//2:])
     return np.concatenate(to_concat)
