@@ -5,7 +5,7 @@ import numpy as np
 import os
 from glob import glob
 import argparse
-from tool.split_join import split_patches, join_patches
+from tools.split_join import split_patches, join_patches
 
 
 parser = argparse.ArgumentParser()
