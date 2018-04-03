@@ -68,7 +68,7 @@ def join_patches(images, n1, n2, k_size, strides):
 def run_image(image):
     h, w = image.shape[:2]
     resized_image = resize(image)
-    splited_images = extract_patches(image, [1,*args.k_size,1], [1,*args.strides,1]):
+    splited_images = extract_patches(image, [1,*args.k_size,1], [1,*args.strides,1])
     output_images = sess.run(outputs, feed_dict={inputs: splited_images})
 
     output_image = join_patches(output_images)
