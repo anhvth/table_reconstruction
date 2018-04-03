@@ -27,7 +27,7 @@ saver.restore(sess, tf.train.latest_checkpoint(
     args.checkpoint))
 
 
-def split(image, ksizes, strides):
+def split_patches(image, ksizes, strides):
     images = tf.extract_image_patches(image, ksizes=ksizes, strides=strides, padding='SAME', rates=[1,1,1,1])
     new_shape = [-1, *images.get_shape().as_list()[1:3], *ksizes[1:3], image.get_shape().as_list()[-1]]
     images = tf.reshape(images, new_shape)
