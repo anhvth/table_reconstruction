@@ -10,5 +10,3 @@ python pix2pix/pix2pix_128x1024.py\
     --batch_size 1\
     --which_direction AtoB \
     --display_freq 200
-
-    

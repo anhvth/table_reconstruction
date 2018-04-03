@@ -15,7 +15,7 @@ args = parser.parse_args()
 
 
 
-def extract_patches(image):
+def extract_patches(image, k_size, strides):
     images = tf.extract_image_patches(tf.expand_dims(image, 0), k_size, strides, rates=[1,1,1,1], padding='SAME')[0]
     images_shape = tf.shape(images)
     images_reshape = tf.reshape(images, [images_shape[0]*images_shape[1], *k_size[1:3], 3])
