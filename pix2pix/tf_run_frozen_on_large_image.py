@@ -41,8 +41,8 @@ def get_tensor_by_name(name):
 
 def resize(image):
     h, w = image.shape[:2]
-    new_h = math.ceil(h/args.strides[0])*agrs.strides[0]
-    new_w = math.ceil(w/args.strides[1])*agrs.strides[1]
+    new_h = math.ceil(h/args.strides[0])*args.strides[0]
+    new_w = math.ceil(w/args.strides[1])*args.strides[1]
     return cv2.resize(image, (w, h))
 
 def extract_patches(image, k_size, strides):
@@ -72,7 +72,7 @@ def join_patches(images, n1, n2, k_size, strides):
 def run_image(image):
     h, w = image.shape[:2]
     resized_image = resize(image)
-    splited_images = split_patches(resized_image, args.k_size, agrs.strides)
+    splited_images = split_patches(resized_image, args.k_size, args.strides)
 
     output_images = sess.run(outputs, feed_dict={inputs: splited_images})
 
