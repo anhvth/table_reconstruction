@@ -14,7 +14,6 @@ parser.add_argument('--k_size', default=[256,512], type=int, help='')
 parser.add_argument('--checkpoint', default='pix2pix/output/frozen/128x1024')
 parser.add_argument('--input_dir', default='data/cell_data', help='directory to input images')
 parser.add_argument('--output_dir', default='output/run_method2', help='output image')
-parser.add_argument('--method', type=str, default='method2', help='method')
 args = parser.parse_args()
 
 meta_path = '{}/export.meta'.format(args.checkpoint)
@@ -98,13 +97,8 @@ if __name__ == '__main__':
         image = np.stack([image]*3, axis=2)
         inputs = get_tensor_by_name('inputs')
         outputs = get_tensor_by_name('outputs')
-        assert args.method is not None
-        if args.method=='method1':
-            output_image = run_image(image)
-        elif args.method=='method2':
-            output_image = run_large_image(image)
-        else:
-            assert False
+        output_image = run_image(image)
+
             
         output_image = cv2.cvtColor(output_image, cv2.COLOR_RGB2BGR)
         merge_image = 0.5*image+0.5*output_image
