@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--input_dir", help="path to folder containing images")
 parser.add_argument("--mode", required=True,
                     choices=["train", "test", "export"])
-parser.add_argument("--output_dir", default='pix2pix/frozen/128x1024',
+parser.add_argument("--output_dir",
                     required=True, help="where to put output files")
 parser.add_argument("--seed", type=int)
 parser.add_argument("--checkpoint", default=None,
@@ -52,7 +52,7 @@ parser.add_argument("--ngf", type=int, default=64,
 parser.add_argument("--ndf", type=int, default=64,
                     help="number of discriminator filters in first conv layer")
 parser.add_argument("--scale_size", type=int, default=[
-                    128, 1024], help="scale images to this size before cropping to 256x256")
+                    128, 512], help="scale images to this size before cropping to 256x256")
 parser.add_argument("--flip", dest="flip", action="store_true",
                     help="flip images horizontally")
 parser.add_argument("--no_flip", dest="flip",
@@ -73,7 +73,7 @@ parser.add_argument("--output_filetype", default="png",
 a = parser.parse_args()
 
 EPS = 1e-12
-CROP_SIZE = [128, 1024]
+CROP_SIZE = [128, 512]
 
 Examples = collections.namedtuple(
     "Examples", "paths, inputs, targets, count, steps_per_epoch")
@@ -145,7 +145,7 @@ def gen_conv(batch_input, out_channels, stride):
         filters = tf.Variable(tf.random_normal([4, 4, num_filter, num_filter], mean=0, stddev=0.02))
         batch_input2 = tf.nn.atrous_conv2d(batch_input, filters, 3, padding='SAME', name='dilated_conv_generator')
         g1 =  tf.layers.conv2d(batch_input, out_channels//2, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
-        g2 =  tf.layers.conv2d(batch_input2, out_channels//2, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
+        g2 =  tf.layers.conv2d(batch_input2, out_channels-out_channels//2, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
         return tf.concat([g1, g2], axis=-1, name='fuse')        
 # l
 
@@ -301,9 +301,11 @@ def create_generator(generator_inputs, generator_outputs_channels):
     print('Create GENERATOR--------------------------------')
     # encoder_1: [batch, 128, 1024, in_channels] => [batch, 64, 512, ngf]
     with tf.variable_scope("encoder_1"):
+        print('inputs: ', generator_inputs.shape)
         output = gen_conv(generator_inputs, a.ngf, 2)
         layers.append(output)
         print(output.shape)
+
     layer_specs = [
         # encoder_2: [batch, 64, 512, ngf] => [batch,  32, 256, ngf * 2]
         a.ngf * 2,
@@ -376,6 +378,7 @@ def create_generator(generator_inputs, generator_outputs_channels):
         rectified = tf.nn.relu(input)
         logits = gen_deconv(rectified, 3, 2)
         outputs = tf.tanh(logits)
+        print(outputs.shape)
         # outputs_cirtant = outputs#tf.to_float(outputs > 0)*outputs
         # layers.append(outputs_cirtant)
         # print(outputs_cirtant.shape)
@@ -568,7 +571,7 @@ def main():
 
     if a.mode == "export":
         # export the generator to a meta graph that can be imported later for standalone generation
-        inputs = tf.placeholder(tf.float32, [None, 128, 1024, 3], 'inputs')
+        inputs = tf.placeholder(tf.float32, [None, *CROP_SIZE, 3], 'inputs')
 
         batch_input = inputs / 255
         print('Batch input:', batch_input)
