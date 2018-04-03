@@ -321,7 +321,7 @@ def create_generator(generator_inputs, generator_outputs_channels):
         a.ngf * 8,
     ]
 
-    strides = [2, 2, 2, 2, 2, 2, 1]
+    strides = [2, 2, 2, 2, 2, 1, 1]
 
     for out_channels, stride in zip(layer_specs, strides):
         with tf.variable_scope("encoder_%d" % (len(layers) + 1)):
@@ -336,7 +336,7 @@ def create_generator(generator_inputs, generator_outputs_channels):
         # decoder_8: [batch, 1, 4, ngf * 8] =>          [batch, 1, 8, ngf * 8 * 2]
         (a.ngf * 8, 0.5, 1),
         # decoder_7: [batch, 1, 8, ngf * 8 * 2] =>      [batch, 2, 16, ngf * 8 * 2]
-        (a.ngf * 8, 0.5, 2),
+        (a.ngf * 8, 0.5, 1),
         # decoder_6: [batch, 2, 16, ngf * 8 * 2] =>     [batch, 4, 32, ngf * 8 * 2]
         (a.ngf * 8, 0.5, 2),
         # decoder_5: [batch, 4, 32, ngf * 8 * 2] =>     [batch, 8, 64, ngf * 8 * 2]
