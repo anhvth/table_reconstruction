@@ -66,6 +66,8 @@ parser.add_argument("--l1_weight", type=float, default=100.0,
                     help="weight on L1 term for generator gradient")
 parser.add_argument("--gan_weight", type=float, default=1.0,
                     help="weight on GAN term for generator gradient")
+parser.add_argument("--strides", default=[32,128],
+                    help="export strides to run on large image")
 
 # export options
 parser.add_argument("--output_filetype", default="png",
@@ -569,16 +571,59 @@ def main():
     with open(os.path.join(a.output_dir, "options.json"), "w") as f:
         f.write(json.dumps(vars(a), sort_keys=True, indent=4))
 
+
     if a.mode == "export":
         # export the generator to a meta graph that can be imported later for standalone generation
-        inputs = tf.placeholder(tf.float32, [None, *CROP_SIZE, 3], 'inputs')
+        assert a.strides is not None
+        def extract_patches(image, k_size, strides):
+            images = tf.extract_image_patches(tf.expand_dims(
+                image, 0), k_size, strides, rates=[1, 1, 1, 1], padding='SAME')[0]
+            images_shape = tf.shape(images)
+            images_reshape = tf.reshape(
+                images, [images_shape[0]*images_shape[1], *k_size[1:3], 3])
+            images, n1, n2 = tf.cast(images_reshape, tf.uint8) , images_shape[0], images_shape[1]
+            return images, n1, n2
 
-        batch_input = inputs / 255
+        def join_patches(images, n1, n2, k_size, strides):
+
+            s1 = k_size[1]//2-strides[1]//2
+            s2 = k_size[2]//2-strides[2]//2
+            roi = images[:, 
+                        s1:s1+strides[1],\
+                        s2:s2+strides[2],
+                        :]
+            new_shape = [n1, n2, *roi.shape[1:]]
+            reshaped_roi = tf.reshape(roi, new_shape)
+            reshaped_roi = tf.transpose(reshaped_roi, perm=[0,2,1,3,4])
+            rs = tf.shape(reshaped_roi)
+            rv = tf.reshape(reshaped_roi, [rs[0]*rs[1], rs[2]*rs[3], -1])
+            return rv
+
+        def resize(image, new_size=None):
+            shape = tf.shape(image)
+            h, w = shape[0], shape[1]
+            if new_size is None:
+                new_h = tf.cast(tf.ceil(h/CROP_SIZE[0])*CROP_SIZE[0], tf.int32)
+                new_w = tf.cast(tf.ceil(w/CROP_SIZE[1])*CROP_SIZE[1], tf.int32)
+            else:
+                new_h, new_w = new_size
+            return tf.image.resize_bilinear(tf.expand_dims(image, 0), (new_h, new_w))[0]
+        # inputs = tf.placeholder(tf.float32, [None, *CROP_SIZE, 3], 'inputs')
+        inputs = tf.placeholder(tf.float32, [None, None, 3], 'inputs')
+        inputs_shape = tf.shape(inputs)
+        input_resized = resize(inputs)
+        # strides = tf.placeholder_with_default([32, 256], shape=[2], name='strides')
+        strides = a.strides
+        images, n1, n2 = extract_patches(input_resized, [1, 128, 512,1], [1,*strides,1])
+
+        batch_input = images / 255
         print('Batch input:', batch_input)
         with tf.variable_scope("generator"):
             batch_output = deprocess(
                 create_generator(preprocess(batch_input), 3))
-        outputs = tf.identity(batch_output*255, name='outputs')
+        batch_output = join_patches(batch_output, n1, n2, [1, *CROP_SIZE,1], [1,*strides,1])
+        batch_output = resize(batch_output, [inputs_shape[0], inputs_shape[1]])
+        outputs = tf.identity(tf.cast(batch_output*255, tf.uint8), name='outputs')
 
         init_op = tf.global_variables_initializer()
         restore_saver = tf.train.Saver()

@@ -5,8 +5,10 @@ echo 'start training'
 python pix2pix/pix2pix_128x1024.py\
     --input_dir data/512x512trainingdata_10pxline \
     --output_dir pix2pix/output/128x1024_64_v3 \
-    --mode train --ngf 1 --ndf 1 --save_freq 5000\
+    --mode train --ngf 1 --ndf 1 \
+    --save_freq 50\
     --l1_weight 0 \
     --batch_size 1\
     --which_direction AtoB \
-    --display_freq 200
+    --display_freq 200\
+    
