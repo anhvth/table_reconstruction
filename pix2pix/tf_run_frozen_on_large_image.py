@@ -27,11 +27,7 @@ saver.restore(sess, tf.train.latest_checkpoint(
     args.checkpoint))
 
 
-def split_patches(image, ksizes, strides):
-    images = tf.extract_image_patches(image, ksizes=ksizes, strides=strides, padding='SAME', rates=[1,1,1,1])
-    new_shape = [-1, *images.get_shape().as_list()[1:3], *ksizes[1:3], image.get_shape().as_list()[-1]]
-    images = tf.reshape(images, new_shape)
-    return images
+
 
 
 def get_tensor_by_name(name):
@@ -72,8 +68,7 @@ def join_patches(images, n1, n2, k_size, strides):
 def run_image(image):
     h, w = image.shape[:2]
     resized_image = resize(image)
-    splited_images = split_patches(resized_image, args.k_size, args.strides)
-
+    splited_images = extract_patches(image, [1,*args.k_size,1], [1,*args.strides,1]):
     output_images = sess.run(outputs, feed_dict={inputs: splited_images})
 
     output_image = join_patches(output_images)
