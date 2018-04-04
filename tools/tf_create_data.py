@@ -11,7 +11,7 @@ parser.add_argument('--input_dir', required=True,
 parser.add_argument('--output_dir', required=True,
                     help='output directory for training examples')
 parser.add_argument(
-    '--strides', default=[32, 64], help='output directory for training examples')
+    '--strides', default=[100, 100], help='output directory for training examples')
 parser.add_argument(
     '--ksize', default=[256, 512], help='output directory for training examples')
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     raw_data = tf.read_file(path)
     image = tf.image.decode_png(raw_data)
     rand = tf.to_int32(tf.to_float(tf.shape(image)[:2]) * tf.random_uniform([], 0.5, 1.5))
-    image_resized = tf.image.resize_bilinear(tf.expand_dims(image, 0), rand)[0]
+    image = tf.image.resize_bilinear(tf.expand_dims(image, 0), rand)[0]
     w = tf.shape(image)[1]
     a, b = image[:, :w//2, :], image[:, w//2:, :]
     k_size = [1, *args.ksize, 1]
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     with tf.Session() as sess:
         for p in paths:
             name = p.split('/')[-1].split('.png')[0]
-            for _ in range(10):
+            for _ in range(1):
                 rv = sess.run(output_image, {path: p})
                 for i, image in enumerate(rv):
                     rgb = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -54,3 +54,4 @@ if __name__ == '__main__':
                     cv2.imwrite(out_path, rgb)
                     k += 1
                     print(p, k, end='\r')
+                    break
