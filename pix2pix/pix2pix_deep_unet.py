@@ -75,7 +75,7 @@ parser.add_argument("--output_filetype", default="png",
 a = parser.parse_args()
 
 EPS = 1e-12
-CROP_SIZE = [128, 512]
+CROP_SIZE = [256, 512]
 
 Examples = collections.namedtuple(
     "Examples", "paths, inputs, targets, count, steps_per_epoch")
