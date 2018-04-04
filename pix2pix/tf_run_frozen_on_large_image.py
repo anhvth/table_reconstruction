@@ -17,15 +17,9 @@ parser.add_argument(
     '--output_dir', default='output/run_method2', help='output image')
 args = parser.parse_args()
 
-
-
-
-
-
 def get_tensor_by_name(name):
     name_on_device = '{}:0'.format(name)
     return tf.get_default_graph().get_tensor_by_name(name_on_device)
-
 
 def load_image(path, verbal=False):
     # output 3-d image RGB
