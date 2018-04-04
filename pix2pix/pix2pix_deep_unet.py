@@ -52,7 +52,7 @@ parser.add_argument("--ngf", type=int, default=64,
 parser.add_argument("--ndf", type=int, default=64,
                     help="number of discriminator filters in first conv layer")
 parser.add_argument("--scale_size", type=int, default=[
-                    128, 512], help="scale images to this size before cropping to 256x256")
+                    256, 512], help="scale images to this size before cropping to 256x256")
 parser.add_argument("--flip", dest="flip", action="store_true",
                     help="flip images horizontally")
 parser.add_argument("--no_flip", dest="flip",
