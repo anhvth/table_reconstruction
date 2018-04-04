@@ -66,7 +66,7 @@ parser.add_argument("--l1_weight", type=float, default=100.0,
                     help="weight on L1 term for generator gradient")
 parser.add_argument("--gan_weight", type=float, default=1.0,
                     help="weight on GAN term for generator gradient")
-parser.add_argument("--strides", default=[32,128],
+parser.add_argument("--strides", default=[32,128], type=int,
                     help="export strides to run on large image")
 
 # export options
@@ -180,7 +180,7 @@ def lrelu(x, a=.2):
 
 
 def batchnorm(inputs):
-    return tf.layers.batch_normalization(inputs, axis=3, epsilon=1e-5, momentum=0.1, training=True, gamma_initializer=tf.random_normal_initializer(1.0, 0.02))
+    return tf.layers.batch_normalization(inputs, axis=3, epsilon=1e-5, momentum=0.1, training=True if a.mode=='train' else False, gamma_initializer=tf.random_normal_initializer(1.0, 0.02))
 
 
 def check_image(image):

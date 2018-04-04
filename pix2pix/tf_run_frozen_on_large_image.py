@@ -35,18 +35,19 @@ def load_image(path, verbal=False):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
 
-
+def write(path, image):
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    return cv2.imwrite(path, image)
 if __name__ == '__main__':
     frozen_checkpoint = os.path.join(args.checkpoint, 'frozen') 
     if args.export == True or os.path.exists(frozen_checkpoint)==False:
         print('\n\n{} DOES NOT EXIST\n\n'.format(frozen_checkpoint))
         assert os.path.exists(args.checkpoint), args.checkpoint+' does not exist'
-        cmd_line = '''python pix2pix/pix2pix_128x1024.py  \
+        cmd_line = '''python pix2pix/pix2pix_deep_unet.py  \
                         --mode export \
                         --checkpoint {}\
-                        --strides {}\
                         --output_dir {}'''\
-                        .format(args.checkpoint, args.strides,  frozen_checkpoint)
+                        .format(args.checkpoint,  frozen_checkpoint)
         print(cmd_line)
         os.system(cmd_line)
 
@@ -78,9 +79,7 @@ if __name__ == '__main__':
         merge_image = 0.5*image+0.5*output_image
         # os.makedirs('output/{}_{}'.format(args.stride, name), exist_ok=True)
         print('{}/{}_input.png'.format(args.output_dir, name))
-        cv2.imwrite('{}/{}_input.png'.format(args.output_dir, name), image)
-        cv2.imwrite(
-            '{}/{}_output.png'.format(args.output_dir, name), output_image)
-        cv2.imwrite(
-            '{}/{}_merge.png'.format(args.output_dir, name), merge_image)
+        write('{}/{}_input.png'.format(args.output_dir, name), image)
+        write('{}/{}_output.png'.format(args.output_dir, name), output_image)
+        write('{}/{}_merge.png'.format(args.output_dir, name), merge_image)
     print('Running time:', time()-start)
