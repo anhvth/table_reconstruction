@@ -33,6 +33,8 @@ if __name__ == '__main__':
     path = tf.placeholder(tf.string)
     raw_data = tf.read_file(path)
     image = tf.image.decode_png(raw_data)
+    rand = tf.to_int32(tf.to_float(tf.shape(image)[:2]) * tf.random_uniform([], 0.5, 1.5))
+    image_resized = tf.image.resize_bilinear(tf.expand_dims(image, 0), rand)[0]
     w = tf.shape(image)[1]
     a, b = image[:, :w//2, :], image[:, w//2:, :]
     k_size = [1, *args.ksize, 1]
@@ -47,11 +49,7 @@ if __name__ == '__main__':
             rv = sess.run(output_image, {path: p})
             for i, image in enumerate(rv):
                 rgb = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                for _ in range(5):
-                    rate = np.random.uniform(0.6, 1, 6)
-                    strides = [1, *[np.random.choice(100)+32], 1]
-                    rgb = cv2.resize(rgb, (0, 0), fx)
-                    out_path = '{}/{}.png'.format(args.output_dir, k)
-                    cv2.imwrite(out_path, rgb)
-                    k += 1
-                    print(p, k, end='\r')
+                out_path = '{}/{}.png'.format(args.output_dir, k)
+                cv2.imwrite(out_path, rgb)
+                k += 1
+                print(p, k, end='\r')
