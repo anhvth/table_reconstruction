@@ -297,7 +297,7 @@ def load_examples():
 
 
 class downblock:
-    def __init__(self, x, filters1=64, filters2=32, k_size=[3,3], use_batch_norm=True, fisrt_block=False, name=None):
+    def __init__(self, x, filters1=a.ngf, filters2=a.ngf//2, k_size=[3,3], use_batch_norm=True, fisrt_block=False, name=None):
         with tf.variable_scope(name):
             self.x = x
             if fisrt_block:
@@ -328,7 +328,7 @@ class downblock:
 
 
 class upblock:
-    def __init__(self, x1, x2, filters1=64, filters2=32, k_size=[3,3], use_batch_norm=True, first_layer=False, name=None):
+    def __init__(self, x1, x2, filters1=a.ngf, filters2=a.ngf//2, k_size=[3,3], use_batch_norm=True, first_layer=False, name=None):
         with tf.variable_scope(name):
             self.x1 = x1
             self.x2 = x2
@@ -361,10 +361,10 @@ def create_generator(generator_inputs, generator_outputs_channels):
     db5 = downblock(db4.downsampling_output,name='db5')#8x32->4x16
 
     up5 = upblock(db5.downsampling_output, None, first_layer=True,name='up5')#4x16->8x32
-    up4 = upblock(up5.upsampling_output, db4.downsampling_output,name='up4') #8x32
-    up3 = upblock(up4.upsampling_output, db3.downsampling_output,name='up3') #16x64
-    up2 = upblock(up3.upsampling_output, db2.downsampling_output,name='up2') #32x128
-    up1 = upblock(up2.upsampling_output, db1.downsampling_output,name='up1') #64x256->128x512x32
+    up4 = upblock(up5.upsampling_output, db5.y,name='up4') #8x32
+    up3 = upblock(up4.upsampling_output, db4.y,name='up3') #16x64
+    up2 = upblock(up3.upsampling_output, db3.y,name='up2') #32x128
+    up1 = upblock(up2.upsampling_output, db2.y,name='up1') #64x256->128x512x32
 
     input = up1.upsampling_output #128x512 ->128x512
     rectified = tf.nn.relu(input)
