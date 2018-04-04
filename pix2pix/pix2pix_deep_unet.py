@@ -444,24 +444,17 @@ def create_model(inputs, targets):
     # they share the same underlying variables
     with tf.name_scope("real_discriminator"):
         with tf.variable_scope("discriminator"):
-            # 2x [batch, height, width, channels] => [batch, 30, 30, 1]
             predict_real = create_discriminator(inputs, targets)
 
     with tf.name_scope("fake_discriminator"):
         with tf.variable_scope("discriminator", reuse=True):
-            # 2x [batch, height, width, channels] => [batch, 30, 30, 1]
             predict_fake = create_discriminator(inputs, outputs)
 
     with tf.name_scope("discriminator_loss"):
-        # minimizing -tf.log will try to get inputs to 1
-        # predict_real => 1
-        # predict_fake => 0
         discrim_loss = tf.reduce_mean(-(tf.log(predict_real + EPS) +
                                         tf.log(1 - predict_fake + EPS)))
 
     with tf.name_scope("generator_loss"):
-        # predict_fake => 1
-        # abs(targets - outputs) => 0
         gen_loss_GAN = tf.reduce_mean(-tf.log(predict_fake + EPS))
         gen_loss_L1 = tf.reduce_mean(tf.abs(targets - outputs))
         gen_loss = gen_loss_GAN * a.gan_weight + gen_loss_L1 * a.l1_weight
@@ -500,7 +493,6 @@ def create_model(inputs, targets):
         outputs=outputs,
         train=tf.group(update_losses, incr_global_step, gen_train),
     )
-
 
 def main():
     if a.seed is None:
@@ -579,7 +571,7 @@ def main():
         # strides = tf.placeholder_with_default([32, 256], shape=[2], name='strides')
         strides = a.strides
         images, n1, n2 = extract_patches(
-            input_resized, [1, 128, 512, 1], [1, *strides, 1])
+            input_resized, [1, *CROP_SIZE, 1], [1, *strides, 1])
 
         batch_input = images / 255
         print('Batch input:', batch_input)
