@@ -39,8 +39,8 @@ if __name__ == '__main__':
     a, b = image[:, :w//2, :], image[:, w//2:, :]
     k_size = [1, *args.ksize, 1]
     strides = [1, *args.strides, 1]
-    patcha = extract_patches(a)
-    patchb = extract_patches(b)
+    patcha = extract_patches(a, k_size)
+    patchb = extract_patches(b, strides)
     output_image = tf.concat([patcha, patchb], axis=2)
     k = 0
     with tf.Session() as sess:
