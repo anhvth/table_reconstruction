@@ -41,8 +41,11 @@ if __name__ == '__main__':
             rv = sess.run(output_image, {path:p})
             for i, image in enumerate(rv):
                 rgb = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                out_path = '{}/{}.png'.format(args.output_dir, k)
-                cv2.imwrite(out_path,rgb)
-                k += 1
-                print(p,k, end='\r')        
+                for _ in range(10):
+                    rate = np.random.uniform(0.6,1,6)
+                    rgb = cv2.resize(rgb, (0, 0), fx)    
+                    out_path = '{}/{}.png'.format(args.output_dir, k)
+                    cv2.imwrite(out_path,rgb)
+                    k += 1
+                    print(p,k, end='\r')        
 

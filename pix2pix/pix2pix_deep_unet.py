@@ -66,7 +66,7 @@ parser.add_argument("--l1_weight", type=float, default=100.0,
                     help="weight on L1 term for generator gradient")
 parser.add_argument("--gan_weight", type=float, default=1.0,
                     help="weight on GAN term for generator gradient")
-parser.add_argument("--strides", default=[32,128], type=int,
+parser.add_argument("--strides", default=[32, 128], type=int,
                     help="export strides to run on large image")
 
 # export options
@@ -134,35 +134,43 @@ def gen_conv(batch_input, out_channels, stride):
     # [batch, in_height, in_width, in_channels] => [batch, out_height, out_width, out_channels]
     initializer = tf.random_normal_initializer(0, 0.02)
     num_filter = batch_input.get_shape().as_list()[-1]
-    if False:#a.separable_conv:
+    if False:  # a.separable_conv:
         filters = tf.Variable(tf.random_normal([4, 4, num_filter, num_filter]))
-        batch_input2 = tf.nn.atrous_conv2d(batch_input, filters, 3, padding='SAME', name='dilated_conv_generator')
-        g1 =  tf.layers.separable_conv2d(batch_input, out_channels//2, kernel_size=4, strides=(stride, 2),\
-                padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
-        g2 =  tf.layers.separable_conv2d(batch_input2, out_channels//2, kernel_size=4, strides=(stride, 2),\
-                padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
-        
+        batch_input2 = tf.nn.atrous_conv2d(
+            batch_input, filters, 3, padding='SAME', name='dilated_conv_generator')
+        g1 = tf.layers.separable_conv2d(batch_input, out_channels//2, kernel_size=4, strides=(stride, 2),
+                                        padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
+        g2 = tf.layers.separable_conv2d(batch_input2, out_channels//2, kernel_size=4, strides=(stride, 2),
+                                        padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
+
         return tf.concat([g1, g2], axis=-1, name='fuse')
     else:
-        filters = tf.Variable(tf.random_normal([4, 4, num_filter, num_filter], mean=0, stddev=0.02))
-        batch_input2 = tf.nn.atrous_conv2d(batch_input, filters, 3, padding='SAME', name='dilated_conv_generator')
-        g1 =  tf.layers.conv2d(batch_input, out_channels//2, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
-        g2 =  tf.layers.conv2d(batch_input2, out_channels-out_channels//2, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
-        return tf.concat([g1, g2], axis=-1, name='fuse')        
+        filters = tf.Variable(tf.random_normal(
+            [4, 4, num_filter, num_filter], mean=0, stddev=0.02))
+        batch_input2 = tf.nn.atrous_conv2d(
+            batch_input, filters, 3, padding='SAME', name='dilated_conv_generator')
+        g1 = tf.layers.conv2d(batch_input, out_channels//2, kernel_size=4,
+                              strides=(stride, 2), padding="same", kernel_initializer=initializer)
+        g2 = tf.layers.conv2d(batch_input2, out_channels-out_channels//2, kernel_size=4,
+                              strides=(stride, 2), padding="same", kernel_initializer=initializer)
+        return tf.concat([g1, g2], axis=-1, name='fuse')
+
 
 def gen_deconv(batch_input, out_channels, stride):
     # [batch, in_height, in_width, in_channels] => [batch, out_height, out_width, out_channels]
     initializer = tf.random_normal_initializer(0, 0.02)
     num_filter = batch_input.get_shape().as_list()[-1]
-    if False:#a.separable_conv:
+    if False:  # a.separable_conv:
         _b, h, w, _c = batch_input.shape
         resized_input = tf.image.resize_images(
             batch_input, [h * 2, w * stride], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
-        filters = tf.Variable(tf.random_normal([4, 4, num_filter, out_channels//2]))
-        g1= tf.layers.separable_conv2d(resized_input, out_channels//2, kernel_size=4, strides=(1, 1), padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
-        _,h,w,_ = g1.get_shape().as_list()
+        filters = tf.Variable(tf.random_normal(
+            [4, 4, num_filter, out_channels//2]))
+        g1 = tf.layers.separable_conv2d(resized_input, out_channels//2, kernel_size=4, strides=(
+            1, 1), padding="same", depthwise_initializer=initializer, pointwise_initializer=initializer)
+        _, h, w, _ = g1.get_shape().as_list()
         # g2 = tf.nn.atrous_conv2d_transpose(resized_input, filters, rate=3, padding='SAME', output_shape=[-1, h, w, -1])
-        return g1#tf.concat([g1], axis=-1, name='fuse')
+        return g1  # tf.concat([g1], axis=-1, name='fuse')
     else:
         return tf.layers.conv2d_transpose(batch_input, out_channels, kernel_size=4, strides=(stride, 2), padding="same", kernel_initializer=initializer)
 
@@ -175,12 +183,12 @@ def lrelu(x, a=.2):
         # linear: x/2 + abs(x)/2
         # this block looks like it has 2 inputs on the graph unless we do this
         x = tf.identity(x)
-        return    (0.5 * (1 + a)) * x \
-                + (0.5 * (1 - a)) * tf.abs(x)
+        return (0.5 * (1 + a)) * x \
+            + (0.5 * (1 - a)) * tf.abs(x)
 
 
 def batchnorm(inputs):
-    return tf.layers.batch_normalization(inputs, axis=3, epsilon=1e-5, momentum=0.1, training=True if a.mode=='train' else False, gamma_initializer=tf.random_normal_initializer(1.0, 0.02))
+    return tf.layers.batch_normalization(inputs, axis=3, epsilon=1e-5, momentum=0.1, training=True if a.mode == 'train' else False, gamma_initializer=tf.random_normal_initializer(1.0, 0.02))
 
 
 def check_image(image):
@@ -242,7 +250,6 @@ def load_examples():
         a_images = preprocess(raw_input[:, :width//2, :])
         b_images = preprocess(raw_input[:, width//2:, :])
 
-
     if a.which_direction == "AtoB":
         inputs, targets = [a_images, b_images]
     elif a.which_direction == "BtoA":
@@ -264,7 +271,8 @@ def load_examples():
         # new_h = tf.cast(a.scale_size[0]*tf.Variable(tf.random_uniform([], minval=0.75, maxval=1.5)), tf.int32)
         # new_w = tf.cast(a.scale_size[1]*tf.Variable(tf.random_uniform([], minval=0.75, maxval=1.5)), tf.int32)
 
-        r = tf.image.resize_images(r, a.scale_size, method=tf.image.ResizeMethod.AREA)
+        r = tf.image.resize_images(
+            r, a.scale_size, method=tf.image.ResizeMethod.AREA)
         # offset1 = tf.cast(tf.floor(tf.random_uniform([1], 0, a.scale_size[0] - CROP_SIZE[0] + 1, seed=seed)), dtype=tf.int32)
         offset1 = tf.cast(tf.floor(tf.random_uniform(
             [], 0, a.scale_size[0] - CROP_SIZE[0] + 1, seed=seed)), dtype=tf.int32)
@@ -297,81 +305,101 @@ def load_examples():
 
 
 class downblock:
-    def __init__(self, x, filters1=a.ngf, filters2=a.ngf//2, k_size=[3,3], use_batch_norm=True, fisrt_block=False, name=None):
+    def __init__(self, x, filters1=a.ngf, filters2=a.ngf//2, k_size=[3, 3], use_batch_norm=True, fisrt_block=False, name=None):
         with tf.variable_scope(name):
             self.x = x
             if fisrt_block:
-                self.conv1 = tf.layers.conv2d(x, filters1, k_size, padding='same', name='conv1')
+                self.conv1 = tf.layers.conv2d(
+                    x, filters1, k_size, padding='same', name='conv1')
             else:
 
-                self.conv1 = tf.layers.conv2d(lrelu(x), filters1, k_size, padding='same', name='conv1')
-                self.conv1 = batchnorm(self.conv1) if use_batch_norm else self.conv1
+                self.conv1 = tf.layers.conv2d(
+                    lrelu(x), filters1, k_size, padding='same', name='conv1')
+                self.conv1 = batchnorm(
+                    self.conv1) if use_batch_norm else self.conv1
 
-            self.conv2 =  tf.layers.conv2d(lrelu(self.conv1), filters2, k_size, padding='same', name='conv2')
-            self.conv2 = batchnorm(self.conv2) if use_batch_norm else self.conv2
+            self.conv2 = tf.layers.conv2d(
+                lrelu(self.conv1), filters2, k_size, padding='same', name='conv2')
+            self.conv2 = batchnorm(
+                self.conv2) if use_batch_norm else self.conv2
 
-            #pad if input shape and conv2 shape is not the samconv1e
-            n_layer_diff =  self.conv2.get_shape().as_list()[-1] - self.x.get_shape().as_list()[-1]
-            if n_layer_diff != 0 :
+            # pad if input shape and conv2 shape is not the samconv1e
+            n_layer_diff = self.conv2.get_shape().as_list(
+            )[-1] - self.x.get_shape().as_list()[-1]
+            if n_layer_diff != 0:
                 pooled_input = tf.nn.avg_pool(x, ksize=[1, 2, 2, 1],
-                                            strides=[1, 1, 1, 1], padding='SAME')
+                                              strides=[1, 1, 1, 1], padding='SAME')
 
                 padded_input = tf.pad(pooled_input, [[0, 0], [0, 0], [0, 0], [n_layer_diff // 2,
-                                                                            n_layer_diff- n_layer_diff // 2]])
+                                                                              n_layer_diff - n_layer_diff // 2]])
             else:
                 padded_input = x
             self.plus = padded_input + self.conv2
             self.y = self.plus
             out_filter = self.plus.get_shape().as_list()[-1]
-            self.downsampling_output = tf.layers.conv2d(self.plus, out_filter, [3, 3], strides=2, padding='same')
+            self.downsampling_output = tf.layers.conv2d(
+                self.plus, out_filter, [3, 3], strides=2, padding='same')
             print('{}--> {}'.format(self.x.shape, self.downsampling_output.shape))
 
 
 class upblock:
-    def __init__(self, x1, x2, filters1=a.ngf, filters2=a.ngf//2, k_size=[3,3], use_batch_norm=True, first_layer=False, name=None):
+    def __init__(self, x1, x2, filters1=a.ngf, filters2=a.ngf//2, k_size=[3, 3], use_batch_norm=True, first_layer=False, name=None):
         with tf.variable_scope(name):
             self.x1 = x1
             self.x2 = x2
             self.x = tf.concat([x1, x2], axis=-1) if not first_layer else x1
 
-            self.conv1 = tf.layers.conv2d(tf.nn.relu(self.x), filters1, k_size, padding='same', name='conv1')
-            self.conv1 = batchnorm(self.conv1) if use_batch_norm else self.conv1
+            self.conv1 = tf.layers.conv2d(tf.nn.relu(
+                self.x), filters1, k_size, padding='same', name='conv1')
+            self.conv1 = batchnorm(
+                self.conv1) if use_batch_norm else self.conv1
 
-            self.conv2 =  tf.layers.conv2d(tf.nn.relu(self.conv1),  filters2, k_size, padding='same', name='conv2')
-            self.conv2 = batchnorm(self.conv2) if use_batch_norm else self.conv2
+            self.conv2 = tf.layers.conv2d(tf.nn.relu(
+                self.conv1),  filters2, k_size, padding='same', name='conv2')
+            self.conv2 = batchnorm(
+                self.conv2) if use_batch_norm else self.conv2
 
-            #pad if input shape and conv2 shape is not the samconv1e
-            n_layer_diff =  self.conv2.get_shape().as_list()[-1] - self.x.get_shape().as_list()[-1]
+            # pad if input shape and conv2 shape is not the samconv1e
+            n_layer_diff = self.conv2.get_shape().as_list(
+            )[-1] - self.x.get_shape().as_list()[-1]
 
             self.plus = self.x1 + self.conv2
-            
+
             self.y = self.plus
             out_filter = self.plus.get_shape().as_list()[-1]
-            self.upsampling_output = tf.layers.conv2d_transpose(self.plus, out_filter, [3, 3], strides=2, padding='same')
+            self.upsampling_output = tf.layers.conv2d_transpose(
+                self.plus, out_filter, [3, 3], strides=2, padding='same')
             if not first_layer:
-                print('{}+{}--> {}'.format(self.x1.shape, self.x2.shape, self.upsampling_output.shape))
+                print('{}+{}--> {}'.format(self.x1.shape,
+                                           self.x2.shape, self.upsampling_output.shape))
             else:
-                print('{}+[**] ---> {}'.format(self.x1.shape, self.upsampling_output.shape))
+                print('{}+[**] ---> {}'.format(self.x1.shape,
+                                               self.upsampling_output.shape))
+
 
 def create_generator(generator_inputs, generator_outputs_channels):
-    db1 = downblock(generator_inputs, fisrt_block=True ,name='db1')   #128x512->64x256
-    db2 = downblock(db1.downsampling_output,name='db2')#64x256->32x128
-    db3 = downblock(db2.downsampling_output,name='db3')#32x128->16x64
-    db4 = downblock(db3.downsampling_output,name='db4')#16x64->8x32
-    db5 = downblock(db4.downsampling_output,name='db5')#8x32->4x16
+    db1 = downblock(generator_inputs, fisrt_block=True,
+                    name='db1')  # 128x512->64x256
+    db2 = downblock(db1.downsampling_output, name='db2')  # 64x256->32x128
+    db3 = downblock(db2.downsampling_output, name='db3')  # 32x128->16x64
+    db4 = downblock(db3.downsampling_output, name='db4')  # 16x64->8x32
+    db5 = downblock(db4.downsampling_output, name='db5')  # 8x32->4x16
 
-    up5 = upblock(db5.downsampling_output, None, first_layer=True,name='up5')#4x16->8x32
-    up4 = upblock(up5.upsampling_output, db5.y,name='up4') #8x32
-    up3 = upblock(up4.upsampling_output, db4.y,name='up3') #16x64
-    up2 = upblock(up3.upsampling_output, db3.y,name='up2') #32x128
-    up1 = upblock(up2.upsampling_output, db2.y,name='up1') #64x256->128x512x32
+    up5 = upblock(db5.downsampling_output, None,
+                  first_layer=True, name='up5')  # 4x16->8x32
+    up4 = upblock(up5.upsampling_output, db5.y, name='up4')  # 8x32
+    up3 = upblock(up4.upsampling_output, db4.y, name='up3')  # 16x64
+    up2 = upblock(up3.upsampling_output, db3.y, name='up2')  # 32x128
+    up1 = upblock(up2.upsampling_output, db2.y,
+                  name='up1')  # 64x256->128x512x32
 
-    input = up1.upsampling_output #128x512 ->128x512
+    input = up1.upsampling_output  # 128x512 ->128x512
     rectified = tf.nn.relu(input)
     logits = tf.layers.conv2d_transpose(rectified, 3, 1, padding='same')
     outputs = tf.tanh(logits)
     print('generator output: ', outputs.shape)
     return outputs
+
 
 def create_model(inputs, targets):
     def create_discriminator(discrim_inputs, discrim_targets):
@@ -474,7 +502,6 @@ def create_model(inputs, targets):
     )
 
 
-
 def main():
     if a.seed is None:
         a.seed = random.randint(0, 2**31 - 1)
@@ -507,30 +534,31 @@ def main():
     with open(os.path.join(a.output_dir, "options.json"), "w") as f:
         f.write(json.dumps(vars(a), sort_keys=True, indent=4))
 
-
     if a.mode == "export":
         # export the generator to a meta graph that can be imported later for standalone generation
         assert a.strides is not None
+
         def extract_patches(image, k_size, strides):
             images = tf.extract_image_patches(tf.expand_dims(
                 image, 0), k_size, strides, rates=[1, 1, 1, 1], padding='SAME')[0]
             images_shape = tf.shape(images)
             images_reshape = tf.reshape(
                 images, [images_shape[0]*images_shape[1], *k_size[1:3], 3])
-            images, n1, n2 = tf.cast(images_reshape, tf.uint8) , images_shape[0], images_shape[1]
+            images, n1, n2 = tf.cast(
+                images_reshape, tf.uint8), images_shape[0], images_shape[1]
             return images, n1, n2
 
         def join_patches(images, n1, n2, k_size, strides):
 
             s1 = k_size[1]//2-strides[1]//2
             s2 = k_size[2]//2-strides[2]//2
-            roi = images[:, 
-                        s1:s1+strides[1],\
-                        s2:s2+strides[2],
-                        :]
+            roi = images[:,
+                         s1:s1+strides[1],
+                         s2:s2+strides[2],
+                         :]
             new_shape = [n1, n2, *roi.shape[1:]]
             reshaped_roi = tf.reshape(roi, new_shape)
-            reshaped_roi = tf.transpose(reshaped_roi, perm=[0,2,1,3,4])
+            reshaped_roi = tf.transpose(reshaped_roi, perm=[0, 2, 1, 3, 4])
             rs = tf.shape(reshaped_roi)
             rv = tf.reshape(reshaped_roi, [rs[0]*rs[1], rs[2]*rs[3], -1])
             return rv
@@ -550,16 +578,19 @@ def main():
         input_resized = resize(inputs)
         # strides = tf.placeholder_with_default([32, 256], shape=[2], name='strides')
         strides = a.strides
-        images, n1, n2 = extract_patches(input_resized, [1, 128, 512,1], [1,*strides,1])
+        images, n1, n2 = extract_patches(
+            input_resized, [1, 128, 512, 1], [1, *strides, 1])
 
         batch_input = images / 255
         print('Batch input:', batch_input)
         with tf.variable_scope("generator"):
             batch_output = deprocess(
                 create_generator(preprocess(batch_input), 3))
-        batch_output = join_patches(batch_output, n1, n2, [1, *CROP_SIZE,1], [1,*strides,1])
+        batch_output = join_patches(batch_output, n1, n2, [
+                                    1, *CROP_SIZE, 1], [1, *strides, 1])
         batch_output = resize(batch_output, [inputs_shape[0], inputs_shape[1]])
-        outputs = tf.identity(tf.cast(batch_output*255, tf.uint8), name='outputs')
+        outputs = tf.identity(
+            tf.cast(batch_output*255, tf.uint8), name='outputs')
 
         init_op = tf.global_variables_initializer()
         restore_saver = tf.train.Saver()
@@ -691,7 +722,6 @@ def main():
                 options = None
                 run_metadata = None
                 if should(a.trace_freq):
-                    # options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                     run_metadata = tf.RunMetadata()
 
                 fetches = {
